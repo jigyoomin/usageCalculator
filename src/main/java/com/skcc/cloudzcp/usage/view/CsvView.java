@@ -37,7 +37,14 @@ public class CsvView extends AbstractView {
         for (MemoryUsage pod : podList) {
             sb.append(convertToCsv(pod)).append(LINE_SEPERATOR);
         }
+        
         response.setContentType("text/csv");
+        String headerKey = "Content-Disposition";
+        String filename = String.format("%s_%s.csv", usages.getNamespace(), usages.getDate());
+        String headerValue = String.format("attachment; filename=\"%s\"",
+            filename);
+        response.setHeader(headerKey, headerValue);
+        
         BufferedWriter bw = new BufferedWriter(response.getWriter());
         bw.write(sb.toString());
         bw.flush();
