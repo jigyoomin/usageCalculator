@@ -10,7 +10,7 @@ java run
 
 ## Usage
 
-http://localhost:8080/usage/${namespace}/${pod_name_prefix}/memory?date=${date}&unit=${unit}
+http://localhost:8080/usage/${namespace}/${pod_name_prefix}/memory?date=${date}&unit=${unit}&view=${csv}
 
 | Value        | Description                             |
 | ------------- | ----------------------|
@@ -18,3 +18,4 @@ http://localhost:8080/usage/${namespace}/${pod_name_prefix}/memory?date=${date}&
 | pod_name_prefix | k8s pod names prefix. deploy name can be used. Use regex **.*** when you want get all pods. |
 | date | date to query. **yyyyMMdd** style. |
 | unit | unit. T, G, M, K, B, TI, GI, MI, KI . B means byte. default value is **MI**  |
+| view | return style. json, csv support. default is json. |
