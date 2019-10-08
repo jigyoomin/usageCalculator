@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    active: default
+logging:
+  level: 
+    root: info
+    com:
+      skcc:
+        cloudzcp: debug
+k8s:
+  prometheusUrl: https://vup-prometheus.cloudzcp.io
