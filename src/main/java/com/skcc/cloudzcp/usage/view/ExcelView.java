@@ -75,7 +75,7 @@ public class ExcelView extends AbstractView {
         
         int rowNum = 1;
         for (MemoryUsage pod : podList) {
-            createDataRow(sheet, pod, rowNum++);
+            createDataRow(sheet, pod, summaryFont, rowNum++);
         }
         
         
@@ -105,15 +105,25 @@ public class ExcelView extends AbstractView {
         }
     }
     
-    protected void createDataRow(HSSFSheet sheet, MemoryUsage pod, int rowNum) {
+    protected void createDataRow(HSSFSheet sheet, MemoryUsage pod, HSSFFont summaryFont, int rowNum) {
         HSSFRow row = sheet.createRow(rowNum);
         
         HSSFCell podNameCell = row.createCell(0);
         podNameCell.setCellValue(pod.getName());
         
+        HSSFCell aveCell = row.createCell(1);
+        HSSFCellStyle style = sheet.getWorkbook().createCellStyle();
+        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style.setFont(summaryFont);
+        aveCell.setCellStyle(style);
+        aveCell.setCellFormula(String.format("AVERAGE(C%d:Z%d)", rowNum + 1, rowNum + 1));
+        
         List<TimeValue> values = pod.getValues();
         TimeValue firstData = values.get(0);
         int index = attachPreEmptyData(row, firstData);
+        
+        index++;
         
         for (TimeValue tv : values) {
             HSSFCell cell = row.createCell(++index);
@@ -128,7 +138,7 @@ public class ExcelView extends AbstractView {
         
         int index = 0;
         for (index = 0 ; index < firstIndex ; index++) {
-            row.createCell(index + 1);
+            row.createCell(index + 2);
         }
         
         return index;
