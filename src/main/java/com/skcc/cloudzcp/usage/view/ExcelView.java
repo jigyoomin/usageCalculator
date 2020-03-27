@@ -78,7 +78,12 @@ public class ExcelView extends AbstractView {
             createDataRow(sheet, pod, summaryFont, rowNum++);
         }
         
+        createSummaryRow(sheet, summaryFont, summaryRedFont, rowNum);
         
+        int lastCellNum = sheet.getRow(0).getLastCellNum();
+        for (int i = 0 ; i <= lastCellNum ; i++) {
+            sheet.autoSizeColumn(i);
+        }
     }
     
     protected void makeHeader(HSSFSheet sheet, String date, HSSFFont summaryFont) {
@@ -101,7 +106,7 @@ public class ExcelView extends AbstractView {
         for (int i = 0 ; i < 24 ; i ++) {
             HSSFCell cell = headerRow.createCell(i + 2);
             cell.setCellValue(String.format("%s%02d", date, i));
-            cell.setCellType(Cell.CELL_TYPE_STRING);
+            cell.setCellType(HSSFCell.CELL_TYPE_STRING);
         }
     }
     
@@ -144,4 +149,26 @@ public class ExcelView extends AbstractView {
         return index;
     }
 
+    private void createSummaryRow(HSSFSheet sheet, HSSFFont summaryFont, HSSFFont summaryRedFont, int rowNum) {
+        HSSFRow row = sheet.createRow(rowNum);
+        
+        HSSFCell nameCell = row.createCell(0);
+        HSSFCellStyle nameStyle = sheet.getWorkbook().createCellStyle();
+        nameStyle.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+        nameStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        nameStyle.setAlignment(HSSFCellStyle.ALIGN_RIGHT);
+        nameStyle.setFont(summaryFont);
+        nameCell.setCellStyle(nameStyle);
+        nameCell.setCellValue("총 메모리 사용량 (GB)");
+        
+        HSSFCell sumCell = row.createCell(1);
+        HSSFCellStyle sumStyle = sheet.getWorkbook().createCellStyle();
+        sumStyle.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+        sumStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        sumStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        sumStyle.setFont(summaryRedFont);
+        sumCell.setCellStyle(sumStyle);
+        sumCell.setCellFormula(String.format("ROUND(SUM(B2:B%d)/1024,2)", rowNum));        
+    }
+    
 }
