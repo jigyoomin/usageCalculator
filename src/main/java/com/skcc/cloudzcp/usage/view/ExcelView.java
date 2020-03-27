@@ -8,9 +8,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.springframework.web.servlet.view.AbstractView;
 
 import com.skcc.cloudzcp.usage.model.response.MemoryUsage;
@@ -30,9 +34,18 @@ public class ExcelView extends AbstractView {
             throws Exception {
         List<MemoryUsageResponse> usageList = (List<MemoryUsageResponse>) model.get("data");
         HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFFont summaryFont = workbook.createFont();
+        summaryFont.setFontName("Arial");
+        summaryFont.setFontHeightInPoints((short) 10);
+        summaryFont.setBold(true);
+        HSSFFont summaryRedFont = workbook.createFont();
+        summaryRedFont.setFontName("Arial");
+        summaryRedFont.setFontHeightInPoints((short) 10);
+        summaryRedFont.setBold(true);
+        summaryRedFont.setColor(HSSFColor.DARK_RED.index);
 
         for (MemoryUsageResponse usages : usageList) {
-            createSheet(workbook, usages);
+            createSheet(workbook, usages, summaryFont, summaryRedFont);
         }
         String namespace = usageList.get(0).getNamespace();
         
@@ -48,13 +61,13 @@ public class ExcelView extends AbstractView {
         workbook.write(bos);
     }
 
-    private void createSheet(HSSFWorkbook workbook, MemoryUsageResponse usages) {
+    private void createSheet(HSSFWorkbook workbook, MemoryUsageResponse usages, HSSFFont summaryFont, HSSFFont summaryRedFont) {
         String date = usages.getDate().substring(4); // 20200224 -> 0224
         HSSFSheet sheet = workbook.createSheet(date);
         
         List<MemoryUsage> podList = usages.getPodList();
         
-        makeHeader(sheet, usages.getDate());
+        makeHeader(sheet, usages.getDate(), summaryFont);
         
         int rowNum = 1;
         for (MemoryUsage pod : podList) {
@@ -64,13 +77,14 @@ public class ExcelView extends AbstractView {
         
     }
     
-    protected void makeHeader(HSSFSheet sheet, String date) {
+    protected void makeHeader(HSSFSheet sheet, String date, HSSFFont summaryFont) {
         HSSFRow headerRow = sheet.createRow(0);
         headerRow.createCell(0);
         
         for (int i = 0 ; i < 24 ; i ++) {
             HSSFCell cell = headerRow.createCell(i + 1);
             cell.setCellValue(String.format("%s%02d", date, i));
+            cell.setCellType(Cell.CELL_TYPE_STRING);
         }
         
     }
