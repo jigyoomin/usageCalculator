@@ -14,7 +14,6 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.Cell;
 import org.springframework.web.servlet.view.AbstractView;
 
 import com.skcc.cloudzcp.usage.model.response.MemoryUsage;
@@ -105,8 +104,8 @@ public class ExcelView extends AbstractView {
         
         for (int i = 0 ; i < 24 ; i ++) {
             HSSFCell cell = headerRow.createCell(i + 2);
-            cell.setCellValue(String.format("%s%02d", date, i));
-            cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+            cell.setCellValue(Integer.parseInt(String.format("%s%02d", date, i)));
+            cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
         }
     }
     
