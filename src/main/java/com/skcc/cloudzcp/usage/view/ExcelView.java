@@ -66,9 +66,15 @@ public class ExcelView extends AbstractView {
 
     private void createSheet(HSSFWorkbook workbook, MemoryUsageResponse usages, HSSFFont summaryFont, HSSFFont summaryRedFont) {
         String date = usages.getDate().substring(4); // 20200224 -> 0224
-        HSSFSheet sheet = workbook.createSheet(date);
-        
         List<MemoryUsage> podList = usages.getPodList();
+        if (podList == null) {
+        	System.out.println("##########################################");
+        	System.out.println("Pod List is empty : " + usages.getDate());
+        	System.out.println("##########################################");
+        	return;
+        }
+        
+        HSSFSheet sheet = workbook.createSheet(date);
         
         makeHeader(sheet, usages.getDate(), summaryFont);
         

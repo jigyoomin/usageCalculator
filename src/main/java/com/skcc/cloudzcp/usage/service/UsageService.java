@@ -43,15 +43,17 @@ public class UsageService {
     private String queryPath = "/api/v1/query";
     private String queryRangePath = "/api/v1/query_range";
     private String queryTemplate = "sum by(pod_name) (container_memory_working_set_bytes{namespace=\"{NAMESPACE}\",pod_name=~\"{POD_PREFIX}.*\",container_name!=\"POD\",container_name!=\"\"})";
+    private String newQueryTemplate = "sum by(pod) (container_memory_working_set_bytes{namespace=\"{NAMESPACE}\",pod=~\"{POD_PREFIX}.*\",container!=\"POD\",container!=\"\"})";
     
     public MemoryUsageResponse getUsages(String namespace, String podPrefix, String dateString, String unit) throws ParseException {
         
         Date date = yyyyMMdd.parse(dateString);
         
         // "/api/v1/query?query=container_memory_working_set_bytes{namespace=\"zcp-system\",pod_name=~\"zcp-jenkins.*\",container_name!=\"POD\",container_name!=\"\"}[1m]"
-        String query = queryTemplate.replaceAll("\\{" + "NAMESPACE" + "\\}", namespace)
+//        String query = queryTemplate.replaceAll("\\{" + "NAMESPACE" + "\\}", namespace)
+//                .replaceAll("\\{" + "POD_PREFIX" + "\\}", podPrefix);
+        String newQuery = newQueryTemplate.replaceAll("\\{" + "NAMESPACE" + "\\}", namespace)
                 .replaceAll("\\{" + "POD_PREFIX" + "\\}", podPrefix);
-        
 
         Date startTime = getStartDateTime(date);
         long start = startTime.getTime();
@@ -69,19 +71,32 @@ public class UsageService {
         
         usageResponse.setTotal(totalUsage);
         
+//        String podNameKey = "pod_name";
+        String podNameKey = "pod";
+        
         // 하루치를 시간단위로 끊어서 조회해옴.
         for (int i = 0 ; i <= 23; i++) {
             // i 시간만큼 더해서 조회함
             long time = start + (3600 * 1000 * i);
             String dateHour = yyyyMMddHH.format(new Date(time));
             
-            ResponseEntity<ContainerMemoryResponse> responseEntity = getRequest(makeUri(query, time));
+//            ResponseEntity<ContainerMemoryResponse> responseEntity = getRequest(makeUri(query, time));
+            ResponseEntity<ContainerMemoryResponse> responseEntity = getRequest(makeUri(newQuery, time));
             ContainerMemoryResponse response = responseEntity.getBody();
             
             List<Result> resultList = response.getData().getResult();
+            
+//            if (resultList.size() == 0) {
+//            	responseEntity = getRequest(makeUri(newQuery, time));
+//                response = responseEntity.getBody();
+//                
+//                resultList = response.getData().getResult();
+//                podNameKey = "pod";
+//            }
+            
             for (Result result : resultList) {
                 TimeValue timeValue = getAverage(result, dateHour, unitConverter);
-                String podName = result.getMetric().get("pod_name");
+                String podName = result.getMetric().get(podNameKey);
                 
                 MemoryUsage podMemoryUsage = findExistingMemoryUsage(usageResponse, podName);
                 podMemoryUsage.addValue(timeValue);
